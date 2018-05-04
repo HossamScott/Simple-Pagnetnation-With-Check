@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:Tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
@@ -25,6 +27,20 @@
             android:textSize="15sp" />
 
     </android.support.v7.widget.Toolbar>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/refreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar_top">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/main_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            Tools:listitem="@layout/main_row" />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 
 </RelativeLayout>

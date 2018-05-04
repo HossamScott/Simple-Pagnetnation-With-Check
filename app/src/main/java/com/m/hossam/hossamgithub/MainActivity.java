@@ -1,5 +1,8 @@
 package com.m.hossam.hossamgithub;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -7,6 +10,8 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.VolleyError;
@@ -21,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,10 +40,22 @@ public class MainActivity extends AppCompatActivity {
     private boolean loading = true;
     private SwipeRefreshLayout refreshLayout;
 
+    List<String> list; /// adding checked items to list
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        list = new ArrayList<>(); /// checked items list
+
+        Button filter_click = findViewById(R.id.filter_click);
+        filter_click.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                filter_button_method();
+            }
+        });
 
 
         //////////////////////// identifying layout rows
@@ -94,6 +112,42 @@ public class MainActivity extends AppCompatActivity {
         load_data(String.valueOf(page)); ///// load data when app open
 
     }
+
+
+
+    private void filter_button_method() {/////////////// checking list size and adding checked items into array then saving it in SharedPreferences as an array
+        int searchListLength = items.size();
+        for (int i = 0; i < searchListLength; i++) {
+            if (items.get(i).isChecked()) {
+                items.get(i).getId();
+                Log.d("listitem", String.valueOf("id=" + items.get(i).getId()));
+                list.add("id=" + items.get(i).getId());
+            }
+        }
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String s : list) {
+            stringBuilder.append(s);
+            stringBuilder.append("&");
+        }
+
+        if (list.size() == 0) {
+            Toast.makeText(MainActivity.this, getString(R.string.please_select_items), Toast.LENGTH_SHORT).show();
+            list.clear();
+        } else if (list.size() > 10) {
+            Toast.makeText(MainActivity.this, getString(R.string.cant_select_more), Toast.LENGTH_SHORT).show();
+            list.clear();
+        } else {
+            list.clear();
+            SharedPreferences notif_array = getSharedPreferences("items_array", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor_notaif = notif_array.edit();
+            editor_notaif.putString("id", stringBuilder.toString());
+            editor_notaif.apply();
+            Intent intent = new Intent(MainActivity.this, Filtered_Activity.class);
+            startActivity(intent);
+        }
+
+    }
+
 
 
     /////////////////////////////////////Start of Onstart Load method
@@ -167,4 +221,11 @@ public class MainActivity extends AppCompatActivity {
     /////////////////////////////////////End of pagination method
 
 
+    @Override
+    protected void onDestroy() {
+        SharedPreferences.Editor clear = MainActivity.this.getSharedPreferences("items_array", Context.MODE_PRIVATE).edit();
+        clear.clear();
+        clear.apply();
+        super.onDestroy();
+    }
 }
